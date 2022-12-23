@@ -2,23 +2,21 @@ const express = require("express");
 const path = require("path");
 const favicon = require("serve-favicon");
 const logger = require("morgan");
-
+// Always require and configure near the top
 require("dotenv").config();
-
-// connect to database
+// Connect to the database
 require("./config/database");
 
 const app = express();
 
 app.use(logger("dev"));
+
 app.use(express.json());
 
-// serve-favicon and static middleware
+// Configure both serve-favicon & static middleware
 app.use(favicon(path.join(__dirname, "build", "favicon.ico")));
-
-// Put aAPI routes before the "catch all" route
-
-app.use("api/user", require("./routes/api/users"));
+// to serve from the production 'build' folder
+app.use(express.static(path.join(__dirname, "build")));
 
 // checkToken Middleware
 // Middleware to verify token and assign user object of payload to req.user.
@@ -28,7 +26,7 @@ app.use(require("./config/checkToken"));
 // * Put API routes here, before the "catch all" route \\
 app.use("/api/users", require("./routes/api/users"));
 
-// Protects the API routes below from anonymous users
+// Protect the API routes below from anonymous users
 const ensureLoggedIn = require("./config/ensureLoggedIn");
 app.use("/api/items", ensureLoggedIn, require("./routes/api/items"));
 app.use("/api/orders", ensureLoggedIn, require("./routes/api/orders"));
